@@ -1,0 +1,33 @@
+async function doLogin(){
+  var ie = document.getElementById('ie');
+  var ip = document.getElementById('ip');
+  var email = ie ? ie.value.trim() : '';
+  var pw    = ip ? ip.value : '';
+  
+  if(!email || !pw){ set({msg:'Nhập email và mật khẩu!', mtype:'err'}); return; }
+  set({loading:true, msg:null});
+  
+  try {
+    // Gọi thẳng vào con Server Backend của bạn, không gọi Google, không dùng Proxy
+    var r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pw })
+    });
+    
+    var d = await r.json();
+    
+    if(!r.ok){
+      var map = {
+        'INVALID_LOGIN_CREDENTIALS': 'Email hoặc mật khẩu không đúng',
+        'EMAIL_NOT_FOUND': 'Email không tồn tại',
+        'TOO_MANY_ATTEMPTS_TRY_LATER': 'Thử lại sau'
+      };
+      throw new Error(map[d.error] || d.error || 'Đăng nhập thất bại');
+    }
+    
+    set({token: d.idToken, localId: d.localId, email: d.email, step: 'upload', loading: false, msg: null});
+  } catch(e){
+    set({loading: false, msg: e.message, mtype: 'err'});
+  }
+}
