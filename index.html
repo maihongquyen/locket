@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LocketUp</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d0d14;color:#f0f0f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:16px;display:flex;flex-direction:column;align-items:center}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:280px;background:radial-gradient(ellipse 100% 200px at 50% -50px,rgba(255,107,53,.14),transparent);pointer-events:none;z-index:0}
+.topbar{width:100%;max-width:460px;display:flex;align-items:center;gap:10px;padding:20px 0 24px;position:relative;z-index:1}
+.logo-box{width:38px;height:38px;background:linear-gradient(135deg,#ff6b35,#ff9f1c);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 20px rgba(255,107,53,.35)}
+.logo-name{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.logo-name b{color:#ff6b35}
+.badge{margin-left:auto;font-size:9px;color:#555580;border:1px solid #2a2a3d;padding:3px 9px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase}
+#root{width:100%;max-width:460px;position:relative;z-index:1}
+.card{background:#13131a;border:1px solid #222233;border-radius:18px;padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,53,.3),transparent)}
+.slabel{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#555580;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.slabel::after{content:'';flex:1;height:1px;background:#222233}
+.inp{width:100%;background:#08080f;border:1px solid #222233;border-radius:10px;padding:11px 14px;color:#f0f0f8;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;transition:border-color .2s;-webkit-appearance:none;display:block}
+.inp:focus{border-color:#ff6b35}
+textarea.inp{resize:vertical;min-height:64px}
+.lbl{display:block;font-size:12px;color:#555580;margin-bottom:5px}
+.btn{width:100%;background:linear-gradient(135deg,#ff6b35,#ff9f1c);border:none;border-radius:11px;padding:13px;color:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:0;display:block}
+.btn:disabled{opacity:.35;cursor:default}
+.btn-ghost{background:none;border:1px solid #222233;color:#555580;font-size:13px;padding:10px;margin-top:8px}
+.status{border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:12px;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+.status.err{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#f87171}
+.status.ok{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);color:#4ade80}
+.status.info{background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);color:#ff9f1c}
+.dropzone{border:2px dashed #222233;border-radius:12px;padding:32px 16px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s;margin-bottom:12px}
+.dropzone.over{border-color:#ff6b35;background:rgba(255,107,53,.04)}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;margin:0;padding:0;border:none;font-size:0}
+.dicon{font-size:32px;margin-bottom:8px}
+.dtxt{font-size:13px;color:#555580;line-height:1.5}
+.dtxt strong{color:#c0c0d0}
+.preview{position:relative;border-radius:12px;overflow:hidden;margin-bottom:12px;aspect-ratio:1;background:#08080f;border:1px solid #222233}
+.preview img,.preview video{width:100%;height:100%;object-fit:cover;display:block}
+.rmv{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);border:1px solid #333;color:#f0f0f8;border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.userbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#08080f;border:1px solid #222233;border-radius:10px;margin-bottom:14px}
+.av{width:34px;height:34px;background:linear-gradient(135deg,#ff6b35,#ff9f1c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.uname{font-size:13px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logoutbtn{background:none;border:1px solid #333;color:#555580;padding:5px 11px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0}
+.progbar{height:4px;background:#222233;border-radius:4px;overflow:hidden;margin-bottom:10px}
+.progfill{height:100%;background:linear-gradient(90deg,#ff6b35,#ff9f1c);border-radius:4px;transition:width .35s}
+.pct{text-align:center;color:#555580;font-size:12px;padding:4px 0 0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .65s linear infinite;vertical-align:middle;margin-right:5px;flex-shrink:0;margin-top:1px}
+.steps{display:flex;gap:5px;margin-bottom:18px}
+.step{height:3px;flex:1;border-radius:3px;background:#222233;transition:background .3s}
+.step.on{background:linear-gradient(90deg,#ff6b35,#ff9f1c)}
+.recip{font-size:12px;color:#555580;margin-bottom:12px;line-height:1.5}
+.footer{text-align:center;font-size:11px;color:#44445a;line-height:1.6;padding:8px;max-width:460px;position:relative;z-index:1}
+.big{font-size:52px;margin-bottom:14px;display:block;text-align:center}
+.h1{font-size:20px;font-weight:700;margin-bottom:6px;text-align:center}
+.sub{color:#555580;font-size:13px;margin-bottom:20px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-box">&#128247;</div>
+  <div class="logo-name">Locket<b>Up</b></div>
+  <div class="badge">Unofficial</div>
+</div>
+
+<div id="root"></div>
+
+<div class="footer">&#9888;&#65039; Tool kh&#244;ng ch&#237;nh th&#7913;c. S&#7917; d&#7909;ng tr&#234;n t&#224;i kho&#7843;n c&#7911;a b&#7841;n, tu&#226;n theo Terms of Service c&#7911;a Locket.</div>
+
+<script>
+(function(){
+'use strict';
+
+var PROXY   = 'https://corsproxy.io/?url=';
+var API_KEY = 'AIzaSyDNiVHIVjrvVhJEfGkHrfzCLSfVhM6kPxI';
+var AUTH    = PROXY + encodeURIComponent('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + API_KEY);
+var STORE   = PROXY + encodeURIComponent('https://firebasestorage.googleapis.com/v0/b/locket-img');
+var LOCKET  = PROXY + encodeURIComponent('https://api.locketcamera.com');
+
+var S = { step:'login', token:null, localId:null, email:null, file:null, fileType:null, previewUrl:null, caption:'', progress:0, msg:null, mtype:null, loading:false };
+
+function set(o){ for(var k in o) S[k]=o[k]; draw(); }
+
+function draw(){
+  var root = document.getElementById('root');
+  if(!root) return;
+  if(S.step==='login')      root.innerHTML = vLogin();
+  else if(S.step==='upload')     root.innerHTML = vUpload();
+  else if(S.step==='uploading')  root.innerHTML = vUploading();
+  else if(S.step==='done')       root.innerHTML = vDone();
+  bindDrop();
+}
+
+function esc(s){ return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function sbox(msg, type){
+  if(!msg) return '';
+  var spin = (type==='info') ? '<span class="spin"></span>' : '';
+  return '<div class="status '+type+'">'+spin+'<span>'+esc(msg)+'</span></div>';
+}
+
+function vLogin(){
+  var dis = S.loading ? ' disabled' : '';
+  var btn = S.loading
+    ? '<span class="spin"></span>Dang dang nhap...'
+    : '&#128274; &#272;&#259;ng nh&#7853;p';
+  return '<div class="card">'+
+    '<div class="steps"><div class="step on"></div><div class="step"></div></div>'+
+    '<div class="slabel">&#272;&#462;ng nh&#7853;p Locket</div>'+
+    sbox(S.msg, S.mtype)+
+    '<label class="lbl">Email</label>'+
+    '<input class="inp" type="email" id="ie" placeholder="your@email.com" autocomplete="email">'+
+    '<label class="lbl">M&#7853;t kh&#7849;u</label>'+
+    '<input class="inp" type="password" id="ip" placeholder="Mat khau cua ban" autocomplete="current-password">'+
+    '<button class="btn" id="btn-login"'+dis+'>'+btn+'</button>'+
+    '<p style="margin-top:12px;font-size:11px;color:#44445a;text-align:center;line-height:1.5">Thong tin chi gui thang den Firebase khong qua server nao khac.</p>'+
+    '</div>';
+}
+
+function vUpload(){
+  var prev = '';
+  if(S.previewUrl){
+    var media = S.fileType==='video'
+      ? '<video src="'+S.previewUrl+'" controls playsinline muted></video>'
+      : '<img src="'+S.previewUrl+'" alt="preview">';
+    prev = '<div class="preview">'+media+'<button class="rmv" id="btn-rmv">&#10005; Xoa</button></div>';
+  } else {
+    prev = '<div class="dropzone" id="dz">'+
+      '<input type="file" accept="image/*,video/*" id="fi">'+
+      '<div class="dicon">&#128193;</div>'+
+      '<div class="dtxt"><strong>Keo tha hoac nhan de chon</strong><br>Anh JPG, PNG, WEBP hoac Video MP4</div>'+
+      '</div>';
+  }
+  var dis = S.file ? '' : ' disabled';
+  return '<div class="card">'+
+    '<div class="steps"><div class="step on"></div><div class="step on"></div></div>'+
+    '<div class="slabel">Tai khoan</div>'+
+    '<div class="userbar"><div class="av">&#128100;</div><div class="uname">'+esc(S.email)+'</div>'+
+    '<button class="logoutbtn" id="btn-logout">Dang xuat</button></div>'+
+    '<div class="slabel">Chon anh / video</div>'+
+    sbox(S.msg, S.mtype)+
+    prev+
+    '<label class="lbl">Caption (tuy chon)</label>'+
+    '<textarea class="inp" id="cap" placeholder="Viet gi do...">'+esc(S.caption)+'</textarea>'+
+
+```
+'<div class="recip">&#128225; Moment se gui toi <strong>tat ca ban be</strong> tren Locket cua ban.</div>'+
+'<button class="btn" id="btn-up"'+dis+'>&#128640; Dang len Locket</button>'+
+'</div>';
+```
+
+}
+
+function vUploading(){
+return ‘<div class="card">’+
+‘<div class="slabel">Dang dang len Locket</div>’+
+sbox(S.msg, ‘info’)+
+‘<div class="progbar"><div class="progfill" style="width:'+S.progress+'%"></div></div>’+
+‘<div class="pct">’+S.progress+’% - Vui long khong dong trang</div>’+
+‘</div>’;
+}
+
+function vDone(){
+return ‘<div class="card">’+
+‘<span class="big">🎉</span>’+
+‘<div class="h1">Dang thanh cong!</div>’+
+‘<div class="sub">Moment cua ban da xuat hien tren widget Locket cua ban be!</div>’+
+sbox(S.msg, ‘ok’)+
+‘<button class="btn" id="btn-more">📷 Dang them</button>’+
+‘<button class="btn btn-ghost" id="btn-lo2">Dang xuat</button>’+
+‘</div>’;
+}
+
+function bindDrop(){
+var dz = document.getElementById(‘dz’);
+var fi = document.getElementById(‘fi’);
+if(dz && fi){
+fi.onchange = function(){ if(fi.files[0]) pickFile(fi.files[0]); };
+dz.addEventListener(‘dragover’, function(e){ e.preventDefault(); dz.classList.add(‘over’); });
+dz.addEventListener(‘dragleave’, function(){ dz.classList.remove(‘over’); });
+dz.addEventListener(‘drop’, function(e){ e.preventDefault(); dz.classList.remove(‘over’); if(e.dataTransfer.files[0]) pickFile(e.dataTransfer.files[0]); });
+}
+var bl = document.getElementById(‘btn-login’);
+if(bl) bl.onclick = doLogin;
+var ip = document.getElementById(‘ip’);
+if(ip) ip.onkeydown = function(e){ if(e.key===‘Enter’) doLogin(); };
+var br = document.getElementById(‘btn-rmv’);
+if(br) br.onclick = function(){ set({file:null,fileType:null,previewUrl:null,msg:null}); };
+var bu = document.getElementById(‘btn-up’);
+if(bu) bu.onclick = doUpload;
+var blo = document.getElementById(‘btn-logout’);
+if(blo) blo.onclick = doLogout;
+var cap = document.getElementById(‘cap’);
+if(cap) cap.oninput = function(){ S.caption = cap.value; };
+var bmore = document.getElementById(‘btn-more’);
+if(bmore) bmore.onclick = function(){ set({step:‘upload’,file:null,fileType:null,previewUrl:null,caption:’’,msg:null,progress:0,loading:false}); };
+var blo2 = document.getElementById(‘btn-lo2’);
+if(blo2) blo2.onclick = doLogout;
+}
+
+function pickFile(file){
+var isV = file.type.indexOf(‘video’)===0;
+var isI = file.type.indexOf(‘image’)===0;
+if(!isV && !isI){ set({msg:‘Chi ho tro anh hoac video!’, mtype:‘err’}); return; }
+set({file:file, fileType:isV?‘video’:‘image’, previewUrl:URL.createObjectURL(file), msg:null});
+}
+
+function doLogout(){
+set({step:‘login’,token:null,localId:null,email:null,file:null,fileType:null,previewUrl:null,caption:’’,msg:null,mtype:null,loading:false,progress:0});
+}
+
+async function doLogin(){
+var ie = document.getElementById(‘ie’);
+var ip = document.getElementById(‘ip’);
+var email = ie ? ie.value.trim() : ‘’;
+var pw    = ip ? ip.value : ‘’;
+if(!email||!pw){ set({msg:‘Nhap email va mat khau!’, mtype:‘err’}); return; }
+set({loading:true, msg:null});
+try {
+var r = await fetch(AUTH, {
+method:‘POST’,
+headers:{‘Content-Type’:‘application/json’},
+body:JSON.stringify({email:email,password:pw,returnSecureToken:true})
+});
+var d = await r.json();
+if(!r.ok){
+var m = (d.error||{}).message||‘Loi’;
+var map = {‘INVALID_LOGIN_CREDENTIALS’:‘Email hoac mat khau khong dung’,‘INVALID_PASSWORD’:‘Mat khau khong dung’,‘EMAIL_NOT_FOUND’:‘Email khong ton tai’,‘TOO_MANY_ATTEMPTS_TRY_LATER’:‘Thu lai sau’};
+throw new Error(map[m]||m);
+}
+set({token:d.idToken,localId:d.localId,email:d.email,step:‘upload’,loading:false,msg:null});
+} catch(e){
+set({loading:false, msg:e.message, mtype:‘err’});
+}
+}
+
+async function doUpload(){
+if(!S.file) return;
+set({step:‘uploading’,loading:true,msg:‘Buoc 1/3: Dang upload len Firebase…’,mtype:‘info’,progress:15});
+try {
+var ts   = Date.now();
+var ext  = (S.file.type.split(’/’)[1]||‘jpg’).replace(‘jpeg’,‘jpg’);
+var fname = ‘lu_’+ts+’.’+ext;
+var path  = ‘users/’+S.localId+’/moments/thumbnails/’+fname;
+var enc   = encodeURIComponent(path);
+
+```
+var bytes = await S.file.arrayBuffer();
+var bnd   = 'lkt'+ts;
+var te    = new TextEncoder();
+var meta  = JSON.stringify({name:path,contentType:S.file.type,metadata:{creator:S.localId,visibility:'private'}});
+var p1 = te.encode('--'+bnd+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+bnd+'\r\nContent-Type: '+S.file.type+'\r\n\r\n');
+var p2 = te.encode('\r\n--'+bnd+'--');
+var bd = new Uint8Array(p1.byteLength+bytes.byteLength+p2.byteLength);
+bd.set(p1,0); bd.set(new Uint8Array(bytes),p1.byteLength); bd.set(p2,p1.byteLength+bytes.byteLength);
+
+var upUrl = STORE+'/o?uploadType=multipart&name='+enc;
+var upRes = await fetch(upUrl,{
+  method:'POST',
+  headers:{
+    'Content-Type':'multipart/related; boundary='+bnd,
+    'Authorization':'Firebase '+S.token,
+    'X-Firebase-Storage-Version':'ios/10.13.0',
+    'X-Firebase-Gmpid':'1:641029076083:ios:cc8eb46290d69b234fa606'
+  },
+  body:bd
+});
+if(!upRes.ok){ var et=await upRes.text(); throw new Error('Upload loi '+upRes.status+': '+et.slice(0,150)); }
+
+set({progress:60,msg:'Buoc 2/3: Lay download token...'});
+
+var mr = await fetch(STORE+'/o/'+enc,{headers:{'Authorization':'Firebase '+S.token}});
+var md = await mr.json();
+var tk = md.downloadTokens;
+if(!tk) throw new Error('Khong lay duoc token. Vui long thu lai.');
+
+var thumbUrl = 'https://firebasestorage.googleapis.com/v0/b/locket-img/o/'+enc+'?alt=media&token='+tk;
+
+set({progress:80,msg:'Buoc 3/3: Dang moment len Locket...'});
+
+var payload = {data:{
+  analytics:{platform:'ios',google_analytics:{app_instance_id:'7A58F101E5B043519DC9783D63D0A07F'},amplitude:{device_id:'5E1F6CFD-1FC9-4DED-82B1-03743DD1FE09',session_id:{'@type':'type.googleapis.com/google.protobuf.Int64Value',value:''+ts}}},
+  thumbnail_url:thumbUrl,
+  sent_to_all:true,
+  migration:{database:'locket'}
+}};
+if(S.caption) payload.data.caption = S.caption;
+
+var pr = await fetch(LOCKET+'/postMoment',{
+  method:'POST',
+  headers:{'Content-Type':'application/json','Authorization':'Firebase '+S.token,'Accept':'*/*'},
+  body:JSON.stringify(payload)
+});
+var pd = await pr.json();
+set({progress:100});
+
+if(pr.ok||pd.result){
+  set({step:'done',loading:false,msg:'Da dang moment thanh cong! Ban be se thay tren widget.',mtype:'ok'});
+} else {
+  throw new Error('postMoment loi: '+JSON.stringify(pd).slice(0,150));
+}
+```
+
+} catch(e){
+set({step:‘upload’,loading:false,msg:e.message,mtype:‘err’});
+console.error(e);
+}
+}
+
+draw();
+})();
+</script>
+
+</body>
+</html>
