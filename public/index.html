@@ -73,7 +73,6 @@ textarea.inp{resize:vertical;min-height:64px}
 (function(){
 'use strict';
 
-// Định tuyến API qua con Server Backend cục bộ trên Vercel
 var BACKEND = '/api/server'; 
 var STORE_HOST = 'https://firebasestorage.googleapis.com/v0/b/locket-img';
 var LOCKET_HOST = 'https://api.locketcamera.com';
@@ -125,7 +124,7 @@ function vUpload(){
   } else {
     prev = '<div class="dropzone" id="dz">'+
       '<input type="file" accept="image/*,video/*" id="fi">'+
-      '<div class="dicon">&#128193;</div>'+
+      <div class="dicon">&#128193;</div>'+
       '<div class="dtxt"><strong>Kéo thả ảnh/video vào đây</strong><br>Hỗ trợ đầy đủ Video MP4 & Ảnh</div>'+
       '</div>';
   }
@@ -198,7 +197,6 @@ function doLogout(){
   set({step:'login',token:null,localId:null,email:null,file:null,fileType:null,previewUrl:null,caption:'',msg:null,mtype:null,loading:false,progress:0});
 }
 
-// GỌI ĐĂNG NHẬP QUA BACKEND ĐỂ FAKE IPHONE SỊN
 async function doLogin(){
   var ie = document.getElementById('ie');
   var ip = document.getElementById('ip');
@@ -258,22 +256,29 @@ function getVideoThumbnail(file) {
   });
 }
 
-// HÀM ĐẨY FILE QUA PROXY SERVER BACKEND
 async function uploadToStorage(blobData, path, mimeType) {
   var ts = Date.now();
   var enc = encodeURIComponent(path);
   var bytes = await blobData.arrayBuffer();
   
-  // Tạo gói dữ liệu nhị phân Multipart thô gửi lên Server
   var bnd = 'lkt' + ts;
   var te = new TextEncoder();
   var meta = JSON.stringify({name: path, contentType: mimeType, metadata: {creator: S.localId, visibility: 'private'}});
   var p1 = te.encode('--'+bnd+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+bnd+'\r\nContent-Type: '+mimeType+'\r\n\r\n');
   var p2 = te.encode('\r\n--'+bnd+'--');
+  
   var bd = new Uint8Array(p1.byteLength + bytes.byteLength + p2.byteLength);
-  bd.set(p1, 0); bd.set(new Uint8Array(bytes), p1.byteLength); bd.set(p2, p1.byteLength + bytes.byteLength);
+  bd.set(p1, 0); 
+  bd.set(new Uint8Array(bytes), p1.byteLength); 
+  bd.set(p2, p1.byteLength + bytes.byteLength);
 
-  // Gọi lên Server Backend gánh việc upload
+  var binary = '';
+  var len = bd.byteLength;
+  for (var i = 0; i < len; i++) {
+    binary += String.fromCharCode(bd[i]);
+  }
+  var base64Data = btoa(binary);
+
   var upRes = await fetch(BACKEND, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -286,12 +291,11 @@ async function uploadToStorage(blobData, path, mimeType) {
         'Authorization': 'Firebase ' + S.token,
         'X-Firebase-Storage-Version': 'ios/10.13.0'
       },
-      body: { type: 'Buffer', data: Array.from(bd) } // Đóng gói dạng Buffer
+      body: { type: 'Base64', data: base64Data }
     })
   });
   if(!upRes.ok) throw new Error('Server không đẩy được file lên Firebase');
 
-  // Lấy download token
   var tokRes = await fetch(BACKEND, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -309,7 +313,7 @@ async function uploadToStorage(blobData, path, mimeType) {
 
 async function doUpload(){
   if(!S.file) return;
-  set({step:'uploading', loading:true, msg:'Đang xử lý gói tin...', progress:10});
+  set({step:'uploading', loading:true, msg:'Đang chuẩn bị dữ liệu...', progress:10});
   
   try {
     var ts = Date.now();
@@ -331,7 +335,7 @@ async function doUpload(){
       thumbUrl = await uploadToStorage(compressedImg, 'users/' + S.localId + '/moments/thumbnails/lu_' + ts + '.jpg', 'image/jpeg');
     }
 
-    set({progress:85, msg:'Đang phát lệnh tạo Moment lên Locket...'});
+    set({progress:85, msg:'Đang gửi tín hiệu lên Locket API...'});
     var payload = {data: {
       analytics: {platform:'ios'},
       thumbnail_url: thumbUrl,
@@ -341,7 +345,6 @@ async function doUpload(){
     if(isVid) payload.data.video_url = videoUrl;
     if(S.caption) payload.data.caption = S.caption;
 
-    // Gửi lệnh postMoment thông qua server trung gian
     var postRes = await fetch(BACKEND, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
