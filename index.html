@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>LocketUp</title>
+<title>LocketUp - Unofficial Web Client</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0d0d14;color:#f0f0f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:16px;display:flex;flex-direction:column;align-items:center}
@@ -75,7 +74,7 @@ textarea.inp{resize:vertical;min-height:64px}
 'use strict';
 
 var PROXY   = 'https://corsproxy.io/?url=';
-var API_KEY = 'AIzaSyDNiVHIVjrvVhJEfGkHrfzCLSfVhM6kPxI';
+var API_KEY = 'AIzaSyDNiVHIVjrvVhJEfGkHrfzCLSfVhM6kPxI'; // API Key gốc của app
 var AUTH    = PROXY + encodeURIComponent('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + API_KEY);
 var STORE   = PROXY + encodeURIComponent('https://firebasestorage.googleapis.com/v0/b/locket-img');
 var LOCKET  = PROXY + encodeURIComponent('https://api.locketcamera.com');
@@ -104,19 +103,17 @@ function sbox(msg, type){
 
 function vLogin(){
   var dis = S.loading ? ' disabled' : '';
-  var btn = S.loading
-    ? '<span class="spin"></span>Dang dang nhap...'
-    : '&#128274; &#272;&#259;ng nh&#7853;p';
+  var btn = S.loading ? '<span class="spin"></span>Đang đăng nhập...' : '&#128274; Đăng nhập';
   return '<div class="card">'+
     '<div class="steps"><div class="step on"></div><div class="step"></div></div>'+
-    '<div class="slabel">&#272;&#462;ng nh&#7853;p Locket</div>'+
+    '<div class="slabel">Đăng nhập Locket</div>'+
     sbox(S.msg, S.mtype)+
     '<label class="lbl">Email</label>'+
     '<input class="inp" type="email" id="ie" placeholder="your@email.com" autocomplete="email">'+
-    '<label class="lbl">M&#7853;t kh&#7849;u</label>'+
-    '<input class="inp" type="password" id="ip" placeholder="Mat khau cua ban" autocomplete="current-password">'+
+    '<label class="lbl">Mật khẩu</label>'+
+    '<input class="inp" type="password" id="ip" placeholder="Mật khẩu của bạn" autocomplete="current-password">'+
     '<button class="btn" id="btn-login"'+dis+'>'+btn+'</button>'+
-    '<p style="margin-top:12px;font-size:11px;color:#44445a;text-align:center;line-height:1.5">Thong tin chi gui thang den Firebase khong qua server nao khac.</p>'+
+    '<p style="margin-top:12px;font-size:11px;color:#44445a;text-align:center;line-height:1.5">Thông tin được gửi thẳng đến Google Firebase, cẩn thận rủi ro qua Proxy.</p>'+
     '</div>';
 }
 
@@ -126,188 +123,263 @@ function vUpload(){
     var media = S.fileType==='video'
       ? '<video src="'+S.previewUrl+'" controls playsinline muted></video>'
       : '<img src="'+S.previewUrl+'" alt="preview">';
-    prev = '<div class="preview">'+media+'<button class="rmv" id="btn-rmv">&#10005; Xoa</button></div>';
+    prev = '<div class="preview">'+media+'<button class="rmv" id="btn-rmv">&#10005; Xoá</button></div>';
   } else {
     prev = '<div class="dropzone" id="dz">'+
       '<input type="file" accept="image/*,video/*" id="fi">'+
       '<div class="dicon">&#128193;</div>'+
-      '<div class="dtxt"><strong>Keo tha hoac nhan de chon</strong><br>Anh JPG, PNG, WEBP hoac Video MP4</div>'+
+      '<div class="dtxt"><strong>Kéo thả hoặc nhấn để chọn</strong><br>Ảnh JPG, PNG hoặc Video MP4 (Tối đa 15MB)</div>'+
       '</div>';
   }
   var dis = S.file ? '' : ' disabled';
   return '<div class="card">'+
     '<div class="steps"><div class="step on"></div><div class="step on"></div></div>'+
-    '<div class="slabel">Tai khoan</div>'+
+    '<div class="slabel">Tài khoản</div>'+
     '<div class="userbar"><div class="av">&#128100;</div><div class="uname">'+esc(S.email)+'</div>'+
-    '<button class="logoutbtn" id="btn-logout">Dang xuat</button></div>'+
-    '<div class="slabel">Chon anh / video</div>'+
+    '<button class="logoutbtn" id="btn-logout">Đăng xuất</button></div>'+
+    '<div class="slabel">Chọn ảnh / video</div>'+
     sbox(S.msg, S.mtype)+
     prev+
-    '<label class="lbl">Caption (tuy chon)</label>'+
-    '<textarea class="inp" id="cap" placeholder="Viet gi do...">'+esc(S.caption)+'</textarea>'+
-
-```
-'<div class="recip">&#128225; Moment se gui toi <strong>tat ca ban be</strong> tren Locket cua ban.</div>'+
-'<button class="btn" id="btn-up"'+dis+'>&#128640; Dang len Locket</button>'+
-'</div>';
-```
-
+    '<label class="lbl">Caption (tuỳ chọn)</label>'+
+    '<textarea class="inp" id="cap" placeholder="Viết gì đó...">'+esc(S.caption)+'</textarea>'+
+    '<div class="recip">&#128225; Moment sẽ gửi tới <strong>tất cả bạn bè</strong> trên Locket.</div>'+
+    '<button class="btn" id="btn-up"'+dis+'>&#128640; Đăng lên Locket</button>'+
+    '</div>';
 }
 
 function vUploading(){
-return ‘<div class="card">’+
-‘<div class="slabel">Dang dang len Locket</div>’+
-sbox(S.msg, ‘info’)+
-‘<div class="progbar"><div class="progfill" style="width:'+S.progress+'%"></div></div>’+
-‘<div class="pct">’+S.progress+’% - Vui long khong dong trang</div>’+
-‘</div>’;
+  return '<div class="card">'+
+    '<div class="slabel">Đang xử lý & Upload</div>'+
+    sbox(S.msg, 'info')+
+    '<div class="progbar"><div class="progfill" style="width:'+S.progress+'%"></div></div>'+
+    '<div class="pct">'+S.progress+'% - Vui lòng không đóng trang</div>'+
+    '</div>';
 }
 
 function vDone(){
-return ‘<div class="card">’+
-‘<span class="big">🎉</span>’+
-‘<div class="h1">Dang thanh cong!</div>’+
-‘<div class="sub">Moment cua ban da xuat hien tren widget Locket cua ban be!</div>’+
-sbox(S.msg, ‘ok’)+
-‘<button class="btn" id="btn-more">📷 Dang them</button>’+
-‘<button class="btn btn-ghost" id="btn-lo2">Dang xuat</button>’+
-‘</div>’;
+  return '<div class="card">'+
+    '<span class="big">🎉</span>'+
+    '<div class="h1">Đăng thành công!</div>'+
+    '<div class="sub">Moment của bạn đã xuất hiện trên widget Locket của bạn bè!</div>'+
+    sbox(S.msg, 'ok')+
+    '<button class="btn" id="btn-more">📷 Đăng thêm</button>'+
+    '<button class="btn btn-ghost" id="btn-lo2">Đăng xuất</button>'+
+    '</div>';
 }
 
 function bindDrop(){
-var dz = document.getElementById(‘dz’);
-var fi = document.getElementById(‘fi’);
-if(dz && fi){
-fi.onchange = function(){ if(fi.files[0]) pickFile(fi.files[0]); };
-dz.addEventListener(‘dragover’, function(e){ e.preventDefault(); dz.classList.add(‘over’); });
-dz.addEventListener(‘dragleave’, function(){ dz.classList.remove(‘over’); });
-dz.addEventListener(‘drop’, function(e){ e.preventDefault(); dz.classList.remove(‘over’); if(e.dataTransfer.files[0]) pickFile(e.dataTransfer.files[0]); });
-}
-var bl = document.getElementById(‘btn-login’);
-if(bl) bl.onclick = doLogin;
-var ip = document.getElementById(‘ip’);
-if(ip) ip.onkeydown = function(e){ if(e.key===‘Enter’) doLogin(); };
-var br = document.getElementById(‘btn-rmv’);
-if(br) br.onclick = function(){ set({file:null,fileType:null,previewUrl:null,msg:null}); };
-var bu = document.getElementById(‘btn-up’);
-if(bu) bu.onclick = doUpload;
-var blo = document.getElementById(‘btn-logout’);
-if(blo) blo.onclick = doLogout;
-var cap = document.getElementById(‘cap’);
-if(cap) cap.oninput = function(){ S.caption = cap.value; };
-var bmore = document.getElementById(‘btn-more’);
-if(bmore) bmore.onclick = function(){ set({step:‘upload’,file:null,fileType:null,previewUrl:null,caption:’’,msg:null,progress:0,loading:false}); };
-var blo2 = document.getElementById(‘btn-lo2’);
-if(blo2) blo2.onclick = doLogout;
+  var dz = document.getElementById('dz');
+  var fi = document.getElementById('fi');
+  if(dz && fi){
+    fi.onchange = function(){ if(fi.files[0]) pickFile(fi.files[0]); };
+    dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('over'); });
+    dz.addEventListener('dragleave', function(){ dz.classList.remove('over'); });
+    dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('over'); if(e.dataTransfer.files[0]) pickFile(e.dataTransfer.files[0]); });
+  }
+  var bl = document.getElementById('btn-login');
+  if(bl) bl.onclick = doLogin;
+  var ip = document.getElementById('ip');
+  if(ip) ip.onkeydown = function(e){ if(e.key==='Enter') doLogin(); };
+  var br = document.getElementById('btn-rmv');
+  if(br) br.onclick = function(){ set({file:null,fileType:null,previewUrl:null,msg:null}); };
+  var bu = document.getElementById('btn-up');
+  if(bu) bu.onclick = doUpload;
+  var blo = document.getElementById('btn-logout');
+  if(blo) blo.onclick = doLogout;
+  var cap = document.getElementById('cap');
+  if(cap) cap.oninput = function(){ S.caption = cap.value; };
+  var bmore = document.getElementById('btn-more');
+  if(bmore) bmore.onclick = function(){ set({step:'upload',file:null,fileType:null,previewUrl:null,caption:'',msg:null,progress:0,loading:false}); };
+  var blo2 = document.getElementById('btn-lo2');
+  if(blo2) blo2.onclick = doLogout;
 }
 
 function pickFile(file){
-var isV = file.type.indexOf(‘video’)===0;
-var isI = file.type.indexOf(‘image’)===0;
-if(!isV && !isI){ set({msg:‘Chi ho tro anh hoac video!’, mtype:‘err’}); return; }
-set({file:file, fileType:isV?‘video’:‘image’, previewUrl:URL.createObjectURL(file), msg:null});
+  var isV = file.type.indexOf('video')===0;
+  var isI = file.type.indexOf('image')===0;
+  
+  // Chặn dung lượng để tránh sập Proxy (Limit: 15MB)
+  var MAX_SIZE = 15 * 1024 * 1024; 
+  if (file.size > MAX_SIZE) {
+    set({msg: 'File quá lớn (' + (file.size/1024/1024).toFixed(1) + 'MB). Vui lòng chọn file dưới 15MB để tránh lỗi mạng!', mtype: 'err'});
+    return;
+  }
+  
+  if(!isV && !isI){ set({msg:'Chỉ hỗ trợ ảnh hoặc video!', mtype:'err'}); return; }
+  set({file:file, fileType:isV?'video':'image', previewUrl:URL.createObjectURL(file), msg:null});
 }
 
 function doLogout(){
-set({step:‘login’,token:null,localId:null,email:null,file:null,fileType:null,previewUrl:null,caption:’’,msg:null,mtype:null,loading:false,progress:0});
+  set({step:'login',token:null,localId:null,email:null,file:null,fileType:null,previewUrl:null,caption:'',msg:null,mtype:null,loading:false,progress:0});
 }
 
 async function doLogin(){
-var ie = document.getElementById(‘ie’);
-var ip = document.getElementById(‘ip’);
-var email = ie ? ie.value.trim() : ‘’;
-var pw    = ip ? ip.value : ‘’;
-if(!email||!pw){ set({msg:‘Nhap email va mat khau!’, mtype:‘err’}); return; }
-set({loading:true, msg:null});
-try {
-var r = await fetch(AUTH, {
-method:‘POST’,
-headers:{‘Content-Type’:‘application/json’},
-body:JSON.stringify({email:email,password:pw,returnSecureToken:true})
-});
-var d = await r.json();
-if(!r.ok){
-var m = (d.error||{}).message||‘Loi’;
-var map = {‘INVALID_LOGIN_CREDENTIALS’:‘Email hoac mat khau khong dung’,‘INVALID_PASSWORD’:‘Mat khau khong dung’,‘EMAIL_NOT_FOUND’:‘Email khong ton tai’,‘TOO_MANY_ATTEMPTS_TRY_LATER’:‘Thu lai sau’};
-throw new Error(map[m]||m);
-}
-set({token:d.idToken,localId:d.localId,email:d.email,step:‘upload’,loading:false,msg:null});
-} catch(e){
-set({loading:false, msg:e.message, mtype:‘err’});
-}
+  var ie = document.getElementById('ie');
+  var ip = document.getElementById('ip');
+  var email = ie ? ie.value.trim() : '';
+  var pw    = ip ? ip.value : '';
+  if(!email||!pw){ set({msg:'Nhập email và mật khẩu!', mtype:'err'}); return; }
+  set({loading:true, msg:null});
+  try {
+    var r = await fetch(AUTH, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,password:pw,returnSecureToken:true})
+    });
+    var d = await r.json();
+    if(!r.ok){
+      var m = (d.error||{}).message||'Lỗi';
+      var map = {'INVALID_LOGIN_CREDENTIALS':'Email hoặc mật khẩu không đúng','INVALID_PASSWORD':'Mật khẩu không đúng','EMAIL_NOT_FOUND':'Email không tồn tại','TOO_MANY_ATTEMPTS_TRY_LATER':'Thử lại sau'};
+      throw new Error(map[m]||m);
+    }
+    set({token:d.idToken,localId:d.localId,email:d.email,step:'upload',loading:false,msg:null});
+  } catch(e){
+    set({loading:false, msg:e.message, mtype:'err'});
+  }
 }
 
+// Hàm Nén Ảnh (Thu nhỏ và giảm chất lượng)
+function compressImage(file, maxDim, quality) {
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = function() {
+      var w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+        else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(function(blob) {
+        resolve(blob);
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = function() { reject(new Error('Lỗi đọc file ảnh')); };
+  });
+}
+
+// Hàm Lấy Khung hình đầu từ Video làm Thumbnail
+function getVideoThumbnail(file) {
+  return new Promise(function(resolve, reject) {
+    var video = document.createElement('video');
+    video.src = URL.createObjectURL(file);
+    video.muted = true;
+    video.playsInline = true;
+    video.onloadeddata = function() { video.currentTime = 0.1; };
+    video.onseeked = function() {
+      var canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function(blob) {
+        resolve(blob);
+      }, 'image/jpeg', 0.8);
+    };
+    video.onerror = function() { reject(new Error('Không thể đọc dữ liệu video')); };
+  });
+}
+
+// Hàm phụ trợ đẩy file lên Firebase
+async function uploadHelper(fileOrBlob, path, type) {
+  var ts = Date.now();
+  var enc = encodeURIComponent(path);
+  var bytes = await fileOrBlob.arrayBuffer();
+  var bnd = 'lkt' + ts;
+  var te = new TextEncoder();
+  var meta = JSON.stringify({name: path, contentType: type, metadata: {creator: S.localId, visibility: 'private'}});
+  
+  var p1 = te.encode('--'+bnd+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+bnd+'\r\nContent-Type: '+type+'\r\n\r\n');
+  var p2 = te.encode('\r\n--'+bnd+'--');
+  var bd = new Uint8Array(p1.byteLength + bytes.byteLength + p2.byteLength);
+  
+  bd.set(p1, 0); 
+  bd.set(new Uint8Array(bytes), p1.byteLength); 
+  bd.set(p2, p1.byteLength + bytes.byteLength);
+
+  var upUrl = STORE + '/o?uploadType=multipart&name=' + enc;
+  var upRes = await fetch(upUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'multipart/related; boundary=' + bnd,
+      'Authorization': 'Firebase ' + S.token,
+      'X-Firebase-Storage-Version': 'ios/10.13.0'
+    },
+    body: bd
+  });
+  
+  if(!upRes.ok) throw new Error('Upload lỗi ' + upRes.status);
+
+  var mr = await fetch(STORE + '/o/' + enc, {headers: {'Authorization': 'Firebase ' + S.token}});
+  var md = await mr.json();
+  if(!md.downloadTokens) throw new Error('Không lấy được Token tải xuống');
+  
+  return 'https://firebasestorage.googleapis.com/v0/b/locket-img/o/' + enc + '?alt=media&token=' + md.downloadTokens;
+}
+
+// Hàm Xử lý Upload Chính
 async function doUpload(){
-if(!S.file) return;
-set({step:‘uploading’,loading:true,msg:‘Buoc 1/3: Dang upload len Firebase…’,mtype:‘info’,progress:15});
-try {
-var ts   = Date.now();
-var ext  = (S.file.type.split(’/’)[1]||‘jpg’).replace(‘jpeg’,‘jpg’);
-var fname = ‘lu_’+ts+’.’+ext;
-var path  = ‘users/’+S.localId+’/moments/thumbnails/’+fname;
-var enc   = encodeURIComponent(path);
+  if(!S.file) return;
+  set({step:'uploading', loading:true, msg:'Đang chuẩn bị dữ liệu...', mtype:'info', progress:10});
+  
+  try {
+    var ts = Date.now();
+    var isVid = S.fileType === 'video';
+    var thumbUrl = '';
+    var videoUrl = '';
 
-```
-var bytes = await S.file.arrayBuffer();
-var bnd   = 'lkt'+ts;
-var te    = new TextEncoder();
-var meta  = JSON.stringify({name:path,contentType:S.file.type,metadata:{creator:S.localId,visibility:'private'}});
-var p1 = te.encode('--'+bnd+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+bnd+'\r\nContent-Type: '+S.file.type+'\r\n\r\n');
-var p2 = te.encode('\r\n--'+bnd+'--');
-var bd = new Uint8Array(p1.byteLength+bytes.byteLength+p2.byteLength);
-bd.set(p1,0); bd.set(new Uint8Array(bytes),p1.byteLength); bd.set(p2,p1.byteLength+bytes.byteLength);
+    if(isVid) {
+      set({msg:'Đang trích xuất ảnh bìa...', progress:20});
+      var thumbBlob = await getVideoThumbnail(S.file);
 
-var upUrl = STORE+'/o?uploadType=multipart&name='+enc;
-var upRes = await fetch(upUrl,{
-  method:'POST',
-  headers:{
-    'Content-Type':'multipart/related; boundary='+bnd,
-    'Authorization':'Firebase '+S.token,
-    'X-Firebase-Storage-Version':'ios/10.13.0',
-    'X-Firebase-Gmpid':'1:641029076083:ios:cc8eb46290d69b234fa606'
-  },
-  body:bd
-});
-if(!upRes.ok){ var et=await upRes.text(); throw new Error('Upload loi '+upRes.status+': '+et.slice(0,150)); }
+      set({msg:'Đang đẩy Video lên Firebase (Cần kiên nhẫn)...', progress:40});
+      var vExt = (S.file.type.split('/')[1] || 'mp4');
+      videoUrl = await uploadHelper(S.file, 'users/' + S.localId + '/moments/videos/lu_' + ts + '.' + vExt, S.file.type);
 
-set({progress:60,msg:'Buoc 2/3: Lay download token...'});
+      set({msg:'Đang đẩy Ảnh bìa...', progress:70});
+      thumbUrl = await uploadHelper(thumbBlob, 'users/' + S.localId + '/moments/thumbnails/lu_th_' + ts + '.jpg', 'image/jpeg');
+      
+    } else {
+      set({msg:'Đang nén ảnh để upload mượt hơn...', progress:20});
+      var compressedImg = await compressImage(S.file, 1280, 0.85); // Nén max 1280px, quality 85%
+      
+      set({msg:'Đang tải ảnh lên...', progress:50});
+      thumbUrl = await uploadHelper(compressedImg, 'users/' + S.localId + '/moments/thumbnails/lu_' + ts + '.jpg', 'image/jpeg');
+    }
 
-var mr = await fetch(STORE+'/o/'+enc,{headers:{'Authorization':'Firebase '+S.token}});
-var md = await mr.json();
-var tk = md.downloadTokens;
-if(!tk) throw new Error('Khong lay duoc token. Vui long thu lai.');
+    set({progress:85, msg:'Đang gửi tín hiệu lên Locket API...'});
+    
+    var payload = {data: {
+      analytics: {platform:'ios'},
+      thumbnail_url: thumbUrl,
+      sent_to_all: true,
+      migration: {database:'locket'}
+    }};
+    
+    if(isVid) payload.data.video_url = videoUrl;
+    if(S.caption) payload.data.caption = S.caption;
 
-var thumbUrl = 'https://firebasestorage.googleapis.com/v0/b/locket-img/o/'+enc+'?alt=media&token='+tk;
+    var pr = await fetch(LOCKET + '/postMoment', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Firebase ' + S.token},
+      body: JSON.stringify(payload)
+    });
+    
+    var pd = await pr.json();
+    set({progress:100});
 
-set({progress:80,msg:'Buoc 3/3: Dang moment len Locket...'});
-
-var payload = {data:{
-  analytics:{platform:'ios',google_analytics:{app_instance_id:'7A58F101E5B043519DC9783D63D0A07F'},amplitude:{device_id:'5E1F6CFD-1FC9-4DED-82B1-03743DD1FE09',session_id:{'@type':'type.googleapis.com/google.protobuf.Int64Value',value:''+ts}}},
-  thumbnail_url:thumbUrl,
-  sent_to_all:true,
-  migration:{database:'locket'}
-}};
-if(S.caption) payload.data.caption = S.caption;
-
-var pr = await fetch(LOCKET+'/postMoment',{
-  method:'POST',
-  headers:{'Content-Type':'application/json','Authorization':'Firebase '+S.token,'Accept':'*/*'},
-  body:JSON.stringify(payload)
-});
-var pd = await pr.json();
-set({progress:100});
-
-if(pr.ok||pd.result){
-  set({step:'done',loading:false,msg:'Da dang moment thanh cong! Ban be se thay tren widget.',mtype:'ok'});
-} else {
-  throw new Error('postMoment loi: '+JSON.stringify(pd).slice(0,150));
-}
-```
-
-} catch(e){
-set({step:‘upload’,loading:false,msg:e.message,mtype:‘err’});
-console.error(e);
-}
+    if(pr.ok || pd.result){
+      set({step:'done', loading:false, msg:'Moment đã lên sóng!', mtype:'ok'});
+    } else {
+      throw new Error('postMoment lỗi: ' + JSON.stringify(pd).slice(0, 100));
+    }
+  } catch(e){
+    set({step:'upload', loading:false, msg:e.message, mtype:'err'});
+    console.error(e);
+  }
 }
 
 draw();
